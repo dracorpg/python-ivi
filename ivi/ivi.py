@@ -1884,6 +1884,34 @@ class Driver(DriverOperation, DriverIdentity, DriverUtility):
     def _driver_operation_invalidate_all_attributes(self):
         self._cache_valid = dict()
 
+    def _set_termination_character(self, character):
+        "Set termination character for interfaces that use one"
+        if self._driver_operation_simulate:
+            print("[simulating] Call to set_termination_character")
+            return
+        if not self._initialized or self._interface is None:
+            raise NotInitializedException()
+        if type(self._interface) is pyserial.SerialInstrument:
+            self._interface.term_char = character
+        elif type(self._interface) is pyvisa.PyVisaInstrument:
+            self._interface.instrument.set_term_chars(character)
+            # TODO check consistency across interfaces and support more
+           
+    def _get_termination_character(self):
+        "Get termination character"
+        if self._driver_operation_simulate:
+            print("[simulating] Call to get_termination_character")
+            return ''
+        if not self._initialized or self._interface is None:
+            raise NotInitializedException()
+        if type(self._interface) is pyserial.SerialInstrument:
+            return self._interface.term_char
+        elif type(self._interface) is pyvisa.PyVisaInstrument:
+            return self._interface.instrument.get_term_chars()
+            # TODO check consistency across interfaces and support more
+        else:
+            return ''
+
     def _write_raw(self, data):
         "Write binary data to instrument"
         if self._driver_operation_simulate:
